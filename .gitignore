@@ -5,4 +5,5 @@
 /logs/*
 .phpunit.result.cache
 .env
+test.php
 !.env.sample
