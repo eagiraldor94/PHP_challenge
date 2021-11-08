@@ -7,6 +7,7 @@ use Slim\Exception\HttpUnauthorizedException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Tuupola\Middleware\HttpBasicAuthentication;
+use Tuupola\Middleware\JwtAuthentication;
 
 return function (App $app) {
     $username = $_ENV["ADMIN_USERNAME"] ?? 'root';
@@ -18,6 +19,16 @@ return function (App $app) {
         "users" => [
             $username => $password,
         ],
+        "error" => function ($response) {
+            return $response->withStatus(401);
+        }
+    ]));
+
+    $app->add(new JwtAuthentication([
+        "path" => ["/stock","/history"], /* or ["/api", "/admin"] */
+        "attribute" => "decoded_token_data",
+        "secret" => $_ENV["JWT_SECRET"],
+        "algorithm" => ["HS256"],
         "error" => function ($response) {
             return $response->withStatus(401);
         }

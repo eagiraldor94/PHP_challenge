@@ -9,19 +9,54 @@ require_once __DIR__ . '/../app/bootstrap.php';
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Exception\HttpUnauthorizedException;
 use Models\User;
+use Firebase\JWT\JWT;
 
 /**
  * Class created to manage users information
  * @author Ever Giraldo
  */
-class UserController
+class UserController extends Controller
 {
+
     /**
-     * UserController constructor.
+     * @param Request $request (Slim object)
+     * @param Response $response (Slim object)
+     * @requires Header Basic Auth (Basic base_64 encoded string username:password)
+     * @return Response
      */
-    public function __construct()
-    {
+    public function loginUser(Request $request, Response $response): Response
+    {   
+        // Initializing Variables
+        $status = 401;
+        $body = 'Unauthorized';
+
+        // Getting basic http auth
+        $basicAuth = $request->getHeader('Authorization');
+        // Removing basic and possible spaces
+        $basicAuth = preg_replace('/Basic[\s]+/i', '', $basicAuth);
+        $decodedUser = base64_decode($basicAuth[0]);
+        $decodedUser = explode(':', $decodedUser);
+
+        $existingUser = User::where('username',$decodedUser[0])->first();
+        if (!empty($existingUser)) {
+            if (password_verify($decodedUser[1], $existingUser->password)) {
+                $status = 200;
+                $responseArray = array();
+                $responseArray['message'] = 'User logged successfully';
+                $responseArray['JWT'] = JWT::encode(['id' => $existingUser->id, 'email' => $existingUser->email, 'username' => $existingUser->username], $_ENV["JWT_SECRET"], "HS256");
+                $body = json_encode($responseArray);
+
+            }else {
+                throw new HttpUnauthorizedException($request);
+            }
+        }else{
+            throw new HttpUnauthorizedException($request);
+        }
+
+        $response->getBody()->write($body);
+        return $response->withStatus($status);
     }
 
     /**
@@ -77,13 +112,7 @@ class UserController
                 }
             } catch (Exception $e) {
                 //Logging details to check a possible issue
-                $log  = "Origin: ".$_SERVER['REMOTE_ADDR'].' - '.date("Y/m/d h:i:s").PHP_EOL.
-                "Headers: ".print_r($request->headers).PHP_EOL.
-                "Get Params: ".print_r($request->getQueryParams()).PHP_EOL.
-                "Body: ".print_r($request->getParsedBody()).PHP_EOL.
-                "-------------------------".PHP_EOL;
-                //Save string to log, use FILE_APPEND to append.
-                file_put_contents( __DIR__ . '/log_'.date("j.n.Y").'.log', $log, FILE_APPEND);
+                $this->createErrorLog($_SERVER['REMOTE_ADDR'],'user',$request->headers,$request->getQueryParams(),$request->getParsedBody());
             }
         }
         $response->getBody()->write($body);

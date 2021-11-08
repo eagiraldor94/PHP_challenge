@@ -13,7 +13,8 @@
         "php-amqplib/php-amqplib": "^3.0",
         "ext-json": "*",
         "illuminate/database": "~5.1",
-        "guzzlehttp/guzzle": "^7.4"
+        "guzzlehttp/guzzle": "^7.4",
+        "tuupola/slim-jwt-auth": "^3.5"
     },
     "scripts": {
         "start": "php -S localhost:8080 -t public",

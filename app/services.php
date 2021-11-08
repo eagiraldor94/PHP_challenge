@@ -12,9 +12,10 @@ return function (ContainerBuilder $containerBuilder) {
             $username = $_ENV['MAILER_USERNAME'] ?? 'test';
             $password = $_ENV['MAILER_PASSWORD'] ?? 'test';
 
-            $transport = (new Swift_SmtpTransport($host, $port))
+            $transport = (new Swift_SmtpTransport($host, $port,'tls'))
                 ->setUsername($username)
                 ->setPassword($password)
+                ->setStreamOptions(array('ssl' => array('allow_self_signed' => true, 'verify_peer' => false)))
             ;
 
             return new Swift_Mailer($transport);

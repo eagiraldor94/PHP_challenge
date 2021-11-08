@@ -8,7 +8,7 @@ Capsule::schema()->create('logs', function ($table) {
        $table->unsignedBigInteger('user_id');
        $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
        $table->string('name');
-       $table->string('ticker');
+       $table->string('symbol');
        $table->string('open');
        $table->string('high');
        $table->string('low');
