@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 namespace Tests;
+// Including database collection with Eloquent ORM
+require_once __DIR__ . '/../app/bootstrap.php';
 
 use DI\ContainerBuilder;
 use Exception;
@@ -15,6 +17,7 @@ use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
 use Symfony\Component\Dotenv\Dotenv;
+use Models\User;
 
 class BaseTestCase extends PHPUnit_TestCase
 {
@@ -53,11 +56,12 @@ class BaseTestCase extends PHPUnit_TestCase
      */
     protected function getAuthorizationHeader(): String
     {
-        $adminTestingUsername = $_ENV["ADMIN_USERNAME"];
-        $adminTestingPassword = $_ENV["ADMIN_PASSWORD"];
-
-
-        return 'Basic ' . base64_encode("$adminTestingUsername:$adminTestingPassword");
+        $user = User::all();
+        if (count($user)>0) {
+            $adminTestingUsername =  $user[0]->username;
+            $adminTestingPassword = $user[0]->username;
+            return 'Basic ' . base64_encode("$adminTestingUsername:$adminTestingPassword");        
+        }
     }
 
     /**

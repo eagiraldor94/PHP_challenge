@@ -11,6 +11,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Models\Ticker;
 use Models\Log;
 use Models\User;
+use Slim\Exception\HttpUnauthorizedException;
 
 class StockController extends Controller
 {
@@ -171,13 +172,15 @@ class StockController extends Controller
         }
         try {
             // Then we can just call the Mailer from any Controller method.
+            
             $message = (new \Swift_Message('Requested Market Data'))
                 ->setFrom([$_ENV["MAILER_FROM"] => 'PHP Challenge (Market data API)'])
-                ->setTo(['ever.giraldo@gmail.com'])
+                ->setTo([$user->email])
                 ->setBody($body);
 
             // Later just do the actual email sending.
             $this->mailer->send($message);
+            
         } catch (Exception $e) {
             $this->createErrorLog($_SERVER['REMOTE_ADDR'],'user',$request->headers,$request->getQueryParams(),$request->getParsedBody(),'Error sending mail');
         }
