@@ -14,7 +14,7 @@ You will require:
 
 Move to the folder where you will host the app (/opt/lampp/htdocs in case of lampp. c/laragon/www in case of laragon)
 Run the next statement (replacing "folder_name"):
-`git clone https://git.jobsity.com/eagiraldor94/php-challenge.git "folder_name"`
+`git clone https://github.com/eagiraldor94/PHP_challenge "folder_name"`
 
 ## Installing the app
 
